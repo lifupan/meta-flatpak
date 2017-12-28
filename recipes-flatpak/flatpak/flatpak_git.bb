@@ -4,18 +4,18 @@ LICENSE = "LGPLv2.1"
 LIC_FILES_CHKSUM = "file://COPYING;md5=4fbd65380cdd255951079008b364516c"
 
 SRC_URI = " \
-    gitsm://git@github.com/flatpak/flatpak;protocol=https;branch=flatpak-0.8.x \
+    gitsm://git@github.com/flatpak/flatpak;protocol=https \
     file://0001-autogen.sh-fall-back-to-no-gtkdocize-if-it-is-there-.patch \
-    file://0001-common-Allow-command-to-include-command-line-options.patch \
-    file://0001-lib-Allow-passing-command-line-argument-through-laun.patch \
+    file://0002-common-Allow-command-to-include-command-line-options.patch \
+    file://0003-lib-Allow-passing-command-line-argument-through-laun.patch \
 "
 
-SRCREV = "3bd1405364a3c2cb0ffd3ccaf7e75c9a905db44f"
+SRCREV = "9a19ea7c1329d55129898330f5c329ece05c875e"
 
-PV = "0.8.2+git${SRCPV}"
+PV = "0.9.7+git${SRCPV}"
 S = "${WORKDIR}/git"
 
-inherit autotools pkgconfig gettext systemd gobject-introspection
+inherit autotools pkgconfig gettext requires-systemd gobject-introspection
 
 DEPENDS = " \
     glib-2.0 json-glib libsoup-2.4 libarchive elfutils fuse \

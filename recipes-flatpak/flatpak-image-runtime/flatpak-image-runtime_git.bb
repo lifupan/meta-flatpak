@@ -1,6 +1,6 @@
-SUMMARY = "A systemd service to set up fake flatpak runtimes for the image."
-DESCRIPTION = "This package provides a systemd service that fakes flatpak \
-runtimes for the currently running image, using read-only bind mounts."
+SUMMARY = "A systemd service to set up a fake flatpak runtime for the image."
+DESCRIPTION = "This package provides a systemd service that fakes a flatpak \
+runtime for the currently running image, using read-only bind mounts."
 HOMEPAGE = "https://github.com/klihub/flatpak-image-runtime"
 SECTION = "misc"
 
@@ -11,49 +11,31 @@ SRC_URI = " \
   git://git@github.com/klihub/flatpak-image-runtime.git;protocol=http;branch=master \
 "
 
-SRCREV = "94e4b53500ef5767bb00455e6be81235eea7dc65"
+SRCREV = "d4cc5bbbe8be1a1cef4eecb1df656e60d8ad18de"
 
 DEPENDS = "systemd"
 
-inherit autotools pkgconfig systemd flatpak-variables
+inherit autotools pkgconfig requires-systemd flatpak-config
 
 S = "${WORKDIR}/git"
 
 FILES_${PN} = " \
     ${datadir}/flatpak-image-runtime \
-    ${systemd_unitdir}/system/flatpak-current-runtime.service \
-    ${systemd_unitdir}/system/flatpak-distro-runtime.service \
+    ${systemd_unitdir}/system/flatpak-image-runtime.service \
 "
 
 SYSTEMD_SERVICE_${PN} = " \
-    flatpak-current-runtime.service \
-    flatpak-distro-runtime.service \
+    flatpak-image-runtime.service \
 "
 
 EXTRA_OECONF += " \
             --with-systemdunitdir=${systemd_unitdir} \
-            --with-org="iot.${DISTRO}" \
-            --with-arch=${arch} \
-            --with-current=${FLATPAK_CURRENT} \
-            --with-distro-version=${FLATPAK_VERSION} \
+            --with-domain=${FLATPAK_DOMAIN} \
+            --with-arch=${FLATPAK_ARCH} \
+            --with-branch=${FLATPAK_BRANCH} \
 "
 
 do_configure_prepend () {
-    FLATPAK_ROOTFS="${@d.getVar('FLATPAK_ROOTFS', False)}"
-    FLATPAK_CURRENT="${@d.getVar('FLATPAK_CURRENT', False)}"
-    FLATPAK_ARCH="${@d.getVar('FLATPAK_ARCH', False)}"
-    FLATPAK_VERSION="${@d.getVar('FLATPAK_VERSION', False)}"
-
-    case $FLATPAK_ARCH in
-        intel*64) arch=x86_64;;
-        intel*32) arch=x86_32;;
-        intel*)   arch=x86;;
-        *x86*64)  arch=x86_64;;
-        *x86*32)  arch=x86_32;;
-        *x86*)    arch=x86;;
-        *)        arch=$FLATPAK_ARCH;;
-    esac
-
     cd ${S}
         NOCONFIGURE=1 ./bootstrap
     cd -

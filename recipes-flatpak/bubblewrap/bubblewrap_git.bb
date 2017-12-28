@@ -13,7 +13,8 @@ SRCREV = "3ebe54af1b2acb702381ec9b5610b60758d3d163"
 PV = "2016.8+git${SRCPV}"
 S = "${WORKDIR}/git"
 
-inherit autotools pkgconfig systemd
+inherit autotools pkgconfig requires-systemd
+
 AUTO_LIBNAME_PKGS = ""
 
 # possible package configurations

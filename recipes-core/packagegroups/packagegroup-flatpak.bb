@@ -1,8 +1,9 @@
-SUMMARY = "PROJECTNAME Flatpak Application Support"
+SUMMARY = "IoT Reference OS Kit Basic Flatpak Support"
 LICENSE = "MIT"
 
 inherit packagegroup
 
-RDEPENDS_${PN} = " \
-    flatpak flatpak-utils flatpak-image-runtime \
+RDEPENDS_${PN} = "\
+    flatpak \
+    flatpak-image-runtime \
 "

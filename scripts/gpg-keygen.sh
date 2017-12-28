@@ -1,30 +1,68 @@
 #!/bin/bash
 
+# Print an informational message (currently unfiltered).
+msg () {
+    echo "$*"
+}
+
+# Print a fatal error message and exit.
+fatal () {
+    echo "fatal error: $*" 2>1
+    exit 1
+}
+
 # Print help on usage.
 print_usage () {
+    if [ -n "$*" ]; then
+        echo "$*"
+    fi
+
     echo "usage: $0 -c config | -o output [ options ]"
     echo ""
     echo "Generate GPG signing keyring for our flatpak/OSTree repository and"
     echo "export the generated public and secret keys from the keyring."
     echo ""
     echo "The possible options are:"
-    echo "    -c <config>  use provided GPG config file, ignore other options."
-    echo "    -m <mail>    e-mail address for the key (iot-ref-kit@key)"
-    echo "    -o <output>  file(s) to store keys in (${mail%@*}.{cfg,sec,pub})"
-    echo "    -n <name>    real name associated with the generated key"
-    echo "    -T <type>    type of key to generate (DSA)"
-    echo "    -L <len>     length of key to generate (2048)"
-    echo "    -t <subtype> type of subkey to generate (ELG-E)"
-    echo "    -l <sublen>  length of subkey to generate (2048)"
-    echo "    -H <home>    GPG home directory for the keyring."
-    echo "    -2           import keys to GPG2 keyring as well"
-    echo "    -h           show this help"
+    echo "  --home <home>          GPG home directory for the keyring"
+    echo "  --id <key-id>          key ID to check/generate"
+    echo "  --pub <file>           public key file to produce/import"
+    echo "  --sec <file>           secret key file to produce/import"
+    echo "  --config <file>        use provided config, ignore other options"
+    echo "  --type <type>          key type to generate"
+    echo "  --length <bits>        key length to use"
+    echo "  --subkey-type <type>   subkey type to generate"
+    echo "  --subkey-length <bits> subkey length to use"
+    echo "  --name <name>          real name associated with the generated key"
+    echo "  --gpg2                 import keys to GPG2 keyring as well"
+    echo "  --help                 show this help"
+
+    if [ -n "$*" ]; then
+        exit 1
+    else
+        exit 0
+    fi
 }
 
 # Parse the command line.
 parse_command_line () {
     while [ -n "$1" ]; do
         case $1 in
+            --home|-H)
+                GPG_HOME="$2"
+                shift 2
+                ;;
+            --id)
+                GPG_ID="$2"
+                shift 2
+                ;;
+            --pub)
+                GPG_PUB="$2"
+                shift 2
+                ;;
+            --sec)
+                GPG_SEC="$2"
+                shift 2
+                ;;
             --type|-T)
                 GPG_TYPE="$2"
                 shift 2
@@ -41,14 +79,6 @@ parse_command_line () {
                 GPG_SUBLENGTH="$2"
                 shift 2
                 ;;
-            --id|--email|-e|--mail|-m)
-                GPG_ID="$2"
-                shift 2
-                ;;
-            --output|-o|--base)
-                GPG_BASE="$2"
-                shift 2
-                ;;
             --name|-n)
                 GPG_NAME="$2"
                 shift 2;
@@ -57,54 +87,87 @@ parse_command_line () {
                 GPG_CONFIG="$2"
                 shift 2
                 ;;
-            --home|-H)
-                GPG_HOME="$2"
-                shift 2
-                ;;
             --gpg2|-2)
                 GPG2_IMPORT="yes"
                 ;;
             --help|-h)
                 print_usage
-                exit 0
                 ;;
-
             *)
-                print_usage
-                exit 1
+                print_usage "Invalid options/argument $1"
                 ;;
         esac
     done
 
-    if [ -z "$GPG_ID" ]; then
-        GPG_ID="iot-ref-kit@key"
-    else
-        if [ "${GPG_ID##*@}" = "$GPG_ID" ]; then
-            GPG_ID="$GPG_ID@key"
-        fi
+    if [ -z "$GPG_HOME" ]; then
+        GPG_HOME="~/.gnupg"
     fi
 
-    if [ -z "$GPG_BASE" ]; then
-        GPG_BASE="${GPG_ID%%@*}"
+    if [ -z "$GPG_ID" ]; then
+        fatal "missing key ID (--id)"
+    fi
+
+    if [ -z "$GPG_PUB" ]; then
+        GPG_PUB="$GPG_HOME/$GPG_ID.pub"
+    fi
+
+    if [ -z "$GPG_SEC" ]; then
+        GPG_SEC="$GPG_HOME/$GPG_ID.sec"
     fi
 
     if [ -z "$GPG_NAME" ]; then
-        GPG_NAME="Signing Key for ${GPG_BASE%%@*}"
+        GPG_NAME="Signing Key"
     fi
 
-    echo "* GPG key parameters:"
-    echo "      home: ${GPG_HOME:-default gpg home}"
-    echo "    key ID: $GPG_ID"
-    echo "      name: $GPG_NAME"
-    echo "     files: $GPG_BASE.{cfg,pub,sec}"
+    msg "GPG key generation configuration:"
+    msg "        home: $GPG_HOME"
+    msg "      key ID: $GPG_ID"
+    msg "  public key: $GPG_PUB"
+    msg "  public key: $GPG_SEC"
+    msg "      name: $GPG_NAME"
+}
+
+# Check and create GPG home directory if necessary.
+gpg1_chkhome ()
+{
+    if [ ! -d $GPG_HOME ]; then
+        mkdir -p $GPG_HOME
+        chmod og-rwx $GPG_HOME
+    else
+        chmod og-rwx $GPG_HOME
+    fi
+}
+
+# Check if the requested keys are already in the keyring.
+gpg1_chkkeyrings ()
+{
+    if $GPG1 --list-keys | grep -q -e "<$GPG_ID>" && \
+       $GPG1 --list-secret-keys | grep -q -e "<$GPG_ID>"; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 # Check if the requested keys already exist.
 gpg1_chkkeys ()
 {
-    if [ -e $GPG_BASE.pub -a -e $GPG_BASE.sec ]; then
-        echo "* GPG keys $GPG_BASE.{pub,sec} exist, nothing to do..."
-        exit 0
+    if [ ! -e $GPG_PUB -o ! -e $GPG_SEC ]; then
+        msg "* Key files $GPG_PUB/$GPG_SEC not found..."
+        rm -f $GPG_PUB $GPG_SEC
+        if gpg1_chkkeyrings; then
+            msg "* Keys ($GPG_ID) already in keyrings, exporting..."
+            $GPG1 --export --output $GPG_PUB $GPG_ID
+            $GPG1 --export-secret-keys --output $GPG_SEC $GPG_ID
+        else
+            return 1
+        fi
+    else
+        if ! gpg1_chkkeyrings; then
+            msg "* Importing keys $GPG_SEC, $GPG_PUB..."
+            $GPG1 --import $GPG_PUB
+            $GPG1 --import $GPG_SEC
+        fi
     fi
 }
 
@@ -112,16 +175,15 @@ gpg1_chkkeys ()
 gpg1_mkconfig () {
     if [ -n "$GPG_CONFIG" ]; then
         if [ ! -f "$GPG_CONFIG" ]; then
-            echo "Missing GPG config file $GPG_CONFIG."
-            exit 1
+            fatal "Missing GPG key configuration $GPG_CONFIG."
         fi
-        echo "* Using provided GPG config file: $GPG_CONFIG"
+        msg "* Using provided GPG key configuration: $GPG_CONFIG"
     else
-        GPG_CONFIG="$GPG_BASE.cfg"
+        GPG_CONFIG="$GPG_HOME/$GPG_ID.cfg"
 
-        echo "* Generating GPG config file $GPG_CONFIG..."
+        msg "* Generating GPG key configuration $GPG_CONFIG..."
 
-        (echo "%echo Generating repository signing GPG keys..."
+        (echo "%echo Generating GPG signing keys ($GPG_PUB, $GPG_SEC)..."
 	 echo "Key-Type: $GPG_TYPE"
 	 echo "Key-Length: $GPG_LENGTH"
 	 echo "Subkey-Type: $GPG_SUBTYPE"
@@ -129,8 +191,8 @@ gpg1_mkconfig () {
 	 echo "Name-Real: $GPG_NAME"
 	 echo "Name-Email: $GPG_ID"
 	 echo "Expire-Date: 0"
-	 echo "%pubring $GPG_BASE.pub"
-	 echo "%secring $GPG_BASE.sec"
+	 echo "%pubring $GPG_PUB"
+	 echo "%secring $GPG_SEC"
 	 echo "%commit"
 	 echo "%echo done") > $GPG_CONFIG
     fi
@@ -138,45 +200,43 @@ gpg1_mkconfig () {
 
 # Generate GPG1 keys and keyring.
 gpg1_genkeys () {
-    echo "* Generating GPG1 keys and keyring..."
+    msg "* Generating GPG1 keys and keyring..."
 
-    mkdir -p $GPG_HOME
-    chmod og-rwx $GPG_HOME
-
-    gpg --homedir=$GPG_HOME --batch --gen-key $GPG_CONFIG
-    gpg --homedir=$GPG_HOME --import $GPG_BASE.sec
-    gpg --homedir=$GPG_HOME --import $GPG_BASE.pub
+    $GPG1 --batch --gen-key $GPG_CONFIG
+    $GPG1 --import $GPG_SEC
+    $GPG1 --import $GPG_PUB
 }
 
 # Mark all keys trusted in our keyring.
 gpg1_trustkeys () {
-    local _trustdb=gpg.trustdb _fp
+    local _trustdb=$GPG_HOME/gpg.trustdb _fp
 
     #
     # This is a bit iffy... we misuse a supposedly private
     # GPG API (the trust DB format).
     #
 
-    echo "* Marking keys trusted in keyring..."
+    msg "* Marking keys trusted in keyring..."
 
-    gpg --homedir=$GPG_HOME --export-ownertrust > $_trustdb
+    $GPG1 --export-ownertrust > $_trustdb
 
     # Note: we might end up with duplicates but that's ok...
-    for _fp in $(gpg --homedir=$GPG_HOME --fingerprint | \
+    for _fp in $($GPG1 --fingerprint | \
                      grep " fingerprint = " | sed 's/^.* = //g;s/ //g'); do
         echo $_fp:6: >> $_trustdb
     done
 
-    gpg --homedir=$GPG_HOME --import-ownertrust < $_trustdb
+    $GPG1 --import-ownertrust < $_trustdb
+    rm -f $_trustdb
 }
 
 # Import keys to GPG2 keyring.
 gpg2_import () {
     if [ "$GPG2_IMPORT" = "yes" ]; then
-        echo "* Importing keys to GPG2 keyring..."
-        gpg --homedir=$GPG_HOME --export-secret-keys | gpg2 --import
+        msg "* Importing keys to GPG2 keyring..."
+        $GPG1 --export-secret-keys | $GPG2 --import
     else
-        echo "* GPG2 import not requested, skipping..."
+        msg "* GPG2 import not requested, skipping..."
     fi
 }
 
@@ -184,22 +244,31 @@ gpg2_import () {
 #########################
 # main script
 
+GPG_HOME=""
+GPG_ID=""
+GPG_PUB=""
+GPG_SEC=""
 GPG_TYPE="DSA"
 GPG_LENGTH="2048"
 GPG_SUBTYPE="ELG-E"
 GPG_SUBLENGTH="2048"
-GPG_HOME=".gpg.flatpak"
-GPG_BASE=""
-GPG_ID=""
 GPG_NAME=""
+GPG_CONFIG=""
 GPG2_IMPORT=""
-
-set -e
 
 parse_command_line $*
 
-gpg1_chkkeys
-gpg1_mkconfig
-gpg1_genkeys
-gpg1_trustkeys
+set -e
+
+GPG1="gpg --homedir=$GPG_HOME"
+GPG2="gpg2 --homedir=$GPG_HOME"
+
+gpg1_chkhome
+
+if ! gpg1_chkkeys; then
+    gpg1_mkconfig
+    gpg1_genkeys
+    gpg1_trustkeys
+fi
+
 gpg2_import
