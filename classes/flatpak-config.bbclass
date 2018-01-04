@@ -41,6 +41,10 @@ FLATPAK_REPO = "${WORKDIR}/${FLATPAK_PN}.flatpak.${MACHINE}.bare-user"
 # don't want to automatically publish to such a repository.
 FLATPAK_EXPORT ?= "${DEPLOY_DIR}/${FLATPAK_PN}.flatpak.${MACHINE}.archive-z2"
 
+BUILD_ID ?= "${DATETIME}"
+# Do not re-trigger builds just because ${DATETIME} changed.
+BUILD_ID[vardepsexclude] += "DATETIME"
+
 # We use the domain and the (canonical) branch together with ${MACHINE} to
 # construct the full flatpak REFs of our base and SDK runtimes. The full REF
 # is considered the canonical branch and is constructed as:
@@ -62,9 +66,9 @@ FLATPAK_BUILD  ?= "${DISTRO}/${FLATPAK_PN}/build/${BUILD_ID}"
 
 # This is the GPG homedir and the key ID for signing repository commits. If
 # you set the key ID to empty, signing is disabled altogether.
-FLATPAK_GPGDIR ?= "${FLATPAKBASE}/../meta-refkit-core/files/gnupg"
-FLATPAK_GPGID  ?= "${@d.getVar('DISTRO').replace(' ', '_') + \
-                        '-development-signing@key'}"
+FLATPAK_GPGDIR ?= "${FLATPAKBASE}/files/gnupg"
+#LATPAK_GPGID  ?= "${@d.getVar('DISTRO').replace(' ', '_') + 
+FLATPAK_GPGID  ?= "refkit-development-signing@key"
 
 # We can pre-populate the image during build with a set of pre-declared
 # flatpak repositories and associated dedicated flatpak-session users.

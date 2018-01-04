@@ -1,0 +1,26 @@
+diff --git a/src/boot/grub2/ostree-grub-generator b/src/boot/grub2/ostree-grub-generator
+index 5673b264..6b9a3c8a 100644
+--- a/src/boot/grub2/ostree-grub-generator
++++ b/src/boot/grub2/ostree-grub-generator
+@@ -24,7 +24,12 @@ set -e
+ script=$(basename ${0})
+ # Atomically safe location where to generete grub.cfg when executing system upgrade.
+ new_grub2_cfg=${2}
+-entries_path=$(dirname $new_grub2_cfg)/entries
++#entries_path=$(dirname $new_grub2_cfg)/entries
++if [ -n "$_OSTREE_GRUB2_BOOTVERSION" ]; then
++    entries_path="/boot/loader.${_OSTREE_GRUB2_BOOTVERSION}/entries"
++else
++    entries_path=$(dirname $new_grub2_cfg)/entries
++fi
+ 
+ read_config()
+ {
+@@ -87,6 +92,7 @@ cat >> ${new_grub2_cfg} <<EOF
+ serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1
+ default=boot
+ timeout=10
++set root='hd0,gpt2'
+ 
+ EOF
+ }

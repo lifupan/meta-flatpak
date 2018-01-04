@@ -11,7 +11,7 @@
 # pre-generated key pair for any key id (we assume the key files be named
 # as <key-id>.pub and <key-id>.sec) we import those instead of generating
 # them anew.
-REFKIT_SIGNING_KEYDIR ?= "${FLATPAK_LAYERDIR}/../meta-refkit-core/files/gpg-keys"
+REFKIT_SIGNING_KEYDIR ?= "${FLATPAK_LAYERDIR}/files/gpg-keys"
 
 # Signing keys to generate, a list of key IDs.
 REFKIT_SIGNING_KEYS    ?= ""
