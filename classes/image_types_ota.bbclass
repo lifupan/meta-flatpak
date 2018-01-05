@@ -97,8 +97,8 @@ IMAGE_CMD_otaimg () {
 #		mv ${HOME_TMP}/var/sota ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 #		mv ${HOME_TMP}/var/local ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 		# Create /var/sota if it doesn't exist yet
-#		mkdir -p ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota || true
-#		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/ || true
+		mkdir -p ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota || true
+		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/ || true
 		# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
 		install -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
 		rm -rf ${HOME_TMP}
