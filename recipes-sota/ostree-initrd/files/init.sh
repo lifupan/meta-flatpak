@@ -5,6 +5,24 @@ set -eu
 log_info() { echo "$0[$$]: $*" >&2; }
 log_error() { echo "$0[$$]: ERROR $*" >&2; }
 
+fluxdataexpander_enabled() {
+    for freespace in $(parted -m /dev/$datadev unit MiB print free | grep free | cut -d: -f4 | sed 's/MiB//g'); do
+        if [ $(echo $freespace \> $FREESPACE_LIMIT | bc -l) == "1" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+fluxdataexpander_run() {
+    log_info "fluxdataexpander: Expand data partition... "
+    parted -s /dev/$datadev -- resizepart $datadevnum -1s
+    log_info "fluxdataexpander: Finished expanding data partition."
+
+    partprobe
+    sync
+}
+
 do_mount_fs() {
 	log_info "mounting FS: $*"
 	[[ -e /proc/filesystems ]] && { grep -q "$1" /proc/filesystems || { log_error "Unknown filesystem"; return 1; } }
@@ -42,6 +60,27 @@ do_mount_fs devpts /dev/pts
 do_mount_fs tmpfs /dev/shm
 do_mount_fs tmpfs /tmp
 do_mount_fs tmpfs /run
+
+udevd --daemon 
+udevadm trigger --action=add
+
+while [ 1 ] ; do
+    if [ -L /dev/disk/by-label/fluxdata ]; then
+        break
+    else
+        sleep 0.1
+    fi
+done
+
+FREESPACE_LIMIT=10
+datapart=$(readlink -f /dev/disk/by-label/fluxdata)
+datadev=$(lsblk $datapart -n -o PKNAME)
+datadevnum=$(echo ${datapart} | sed 's/\(.*\)\(.\)$/\2/')
+
+if [ fluxdataexpander_enabled ]; then
+	fluxdataexpander_run
+fi
+killall udevd
 
 # check if smack is active (and if so, mount smackfs)
 grep -q smackfs /proc/filesystems && {

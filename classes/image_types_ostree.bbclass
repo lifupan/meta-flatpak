@@ -162,6 +162,10 @@ IMAGE_CMD_ostree () {
 	# Copy image manifest
 	cat ${IMAGE_MANIFEST} | cut -d " " -f1,3 > usr/package.manifest
 
+	# add the required mount
+	echo "LABEL=otaefi     /boot/efi    auto   defaults 0 0" >>usr/etc/fstab
+	echo "LABEL=fluxdata    /var/lib/flatpak    auto   defaults 0 0" >>usr/etc/fstab
+
 	cd ${WORKDIR}
 
 	# Create a tarball that can be then commited to OSTree repo

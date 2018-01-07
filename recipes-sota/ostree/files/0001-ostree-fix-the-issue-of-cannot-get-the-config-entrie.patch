@@ -24,7 +24,7 @@ index 82e66bd..b9cbe22 100644
  serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1
  default=boot
  timeout=10
-+set root='hd0,gpt2'
++set root=(hd0,msdos2)
  
  EOF
  }

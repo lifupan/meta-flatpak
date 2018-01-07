@@ -1,0 +1,15 @@
+[Unit]
+Description=Expand flux-data partition
+Requires=dev-disk-by\x2dlabel-fluxdata.device
+After=dev-disk-by\x2dlabel-fluxdata.device
+DefaultDependencies=no
+Before=var-lib-flatpak.mount umount.target
+Conflicts=umount.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=@BASE_BINDIR@/bash @BINDIR@/flux-filesystem-expand
+
+[Install]
+WantedBy=multi-user.target

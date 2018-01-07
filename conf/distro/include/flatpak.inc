@@ -15,7 +15,7 @@ OSTREE_BRANCHNAME ?= "${IMAGE_BASENAME}"
 OSTREE_OSNAME ?= "pulsar-linux"
 OSTREE_BOOTLOADER ??= 'grub'
 OSTREE_INITRAMFS_IMAGE ?= "initramfs-ostree-image"
-OSTREE_KERNEL_ARGS ?= "ramdisk_size=16384 rw rootfstype=ext4 rootwait rootdelay=2 ostree_root=/dev/sda2"
+OSTREE_KERNEL_ARGS ?= "ramdisk_size=16384 rw rootfstype=ext4 rootwait rootdelay=2 ostree_root=LABEL=otaroot"
 
 INITRAMFS_FSTYPES = "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot', 'ext4.gz.u-boot', 'ext4.gz')}"
 

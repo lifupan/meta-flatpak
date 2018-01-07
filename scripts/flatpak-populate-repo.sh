@@ -229,12 +229,14 @@ repo_populate () {
             _ref=$_b
         else
             msg "* Committing additional branch $_b..."
+	    #workaround the issue of 
             _content="--tree=ref=$_ref"
+            #_content="$FLATPAK_SYSROOT"
         fi
 
        echo "---------repo=$REPO_PATH------ --branch=$_b content=$_content -------------"
 
-       echo ostree --repo=$REPO_PATH commit $GPG_SIGN --owner-uid=0 --owner-gid=0  --no-xattrs --subject "$COMMIT_SUBJECT"  --body "$COMMIT_BODY" --branch=$_b $_content 
+       echo ostree --repo=$REPO_PATH commit $GPG_SIGN --no-xattrs --subject "$COMMIT_SUBJECT"  --body "$COMMIT_BODY" --branch=$_b $_content 
         ostree --repo=$REPO_PATH commit \
            $GPG_SIGN \
            --owner-uid=0 --owner-gid=0  --no-xattrs \

@@ -9,6 +9,7 @@ INHERIT_remove_class-native = "systemd"
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master \
 	   file://0001-ostree-only-deal-with-boot-efi-EFI-BOOT-grub.cfg.patch \
 	   file://0001-ostree-fix-the-issue-of-cannot-get-the-config-entrie.patch \
+	   file://test.patch \
 	  "
 #           file://0001-Allow-updating-files-in-the-boot-directory.patch 
 #           file://0002-u-boot-add-bootdir-to-the-generated-uEnv.txt.patch 
@@ -19,6 +20,8 @@ SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master \
 #PV = "2017.3-31-g3b09620c"
 
 SRCREV = "19d08dab617bf060c6440ecbd8df3347b04741b5"
+
+CLEANBROKEN = "1"
 
 PV = "2017.13+git${SRCPV}"
 
