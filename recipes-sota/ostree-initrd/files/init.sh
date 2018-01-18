@@ -80,7 +80,7 @@ datadevnum=$(echo ${datapart} | sed 's/\(.*\)\(.\)$/\2/')
 if [ fluxdataexpander_enabled ]; then
 	fluxdataexpander_run
 fi
-killall udevd
+killall -q udevd || true
 
 # check if smack is active (and if so, mount smackfs)
 grep -q smackfs /proc/filesystems && {
