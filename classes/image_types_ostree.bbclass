@@ -83,7 +83,7 @@ IMAGE_CMD_ostree () {
 		mkdir -p usr/rootdirs/opt
 		for dir in `ls opt`; do
 			mv opt/$dir usr/rootdirs/opt/
-			echo "L usr/rootdirs/opt/$dir - - - - /opt/$dir" >>${tmpfiles_conf}
+			echo "L /usr/rootdirs/opt/$dir - - - - /opt/$dir" >>${tmpfiles_conf}
 		done
 	fi
 	rm -rf opt
