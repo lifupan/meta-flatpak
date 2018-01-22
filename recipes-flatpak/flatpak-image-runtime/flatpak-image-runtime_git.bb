@@ -9,6 +9,7 @@ LIC_FILES_CHKSUM = "file://LICENSE-BSD;md5=f9f435c1bd3a753365e799edf375fc42"
 
 SRC_URI = " \
   git://git@github.com/klihub/flatpak-image-runtime.git;protocol=http;branch=master \
+  file://support_multilib.patch \
 "
 
 SRCREV = "d4cc5bbbe8be1a1cef4eecb1df656e60d8ad18de"

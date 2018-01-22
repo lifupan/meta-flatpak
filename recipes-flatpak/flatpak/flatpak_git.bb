@@ -8,6 +8,7 @@ SRC_URI = " \
     file://0001-autogen.sh-fall-back-to-no-gtkdocize-if-it-is-there-.patch \
     file://0002-common-Allow-command-to-include-command-line-options.patch \
     file://0003-lib-Allow-passing-command-line-argument-through-laun.patch \
+    file://fix_this_issue_of_related_none.patch \
 "
 
 SRCREV = "9a19ea7c1329d55129898330f5c329ece05c875e"
@@ -63,6 +64,7 @@ FILES_${PN} += " \
     ${datadir}/gir-1.0 \
     ${datadir}/dbus-1/services/*.service \
     ${datadir}/dbus-1/interfaces/*.xml \
+    ${nonarch_libdir}/systemd/ \
 "
 
 FILES_${PN}-build = "${bindir}/flatpak-builder"

@@ -1,0 +1,12 @@
+diff --git a/app/flatpak-transaction.c b/app/flatpak-transaction.c
+index abf250a..fc75a85 100644
+--- a/app/flatpak-transaction.c
++++ b/app/flatpak-transaction.c
+@@ -339,6 +339,7 @@ add_related (FlatpakTransaction *self,
+     {
+       g_printerr (_("Warning: Problem looking for related refs: %s\n"), local_error->message);
+       g_clear_error (&local_error);
++      return TRUE;
+     }
+   else
+     {

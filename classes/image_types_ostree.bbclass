@@ -56,13 +56,11 @@ IMAGE_CMD_ostree () {
 		mkdir -p usr/etc/tmpfiles.d
 		tmpfiles_conf=usr/etc/tmpfiles.d/00ostree-tmpfiles.conf
 		echo "d /var/rootdirs 0755 root root -" >>${tmpfiles_conf}
-		echo "L /var/rootdirs/home - - - - /sysroot/home" >>${tmpfiles_conf}
 	else
 		mkdir -p usr/etc/init.d
 		tmpfiles_conf=usr/etc/init.d/tmpfiles.sh
 		echo '#!/bin/sh' > ${tmpfiles_conf}
 		echo "mkdir -p /var/rootdirs; chmod 755 /var/rootdirs" >> ${tmpfiles_conf}
-		echo "ln -sf /sysroot/home /var/rootdirs/home" >> ${tmpfiles_conf}
 
 		ln -s ../init.d/tmpfiles.sh usr/etc/rcS.d/S20tmpfiles.sh
 	fi
@@ -76,7 +74,8 @@ IMAGE_CMD_ostree () {
 	mkdir -p usr/homedirs
 	if [ -d "home" ] && [ ! -L "home" ]; then
 		mv home usr/homedirs/home
-		ln -sf var/rootdirs/home home
+		mkdir var/home
+		ln -sf var/home home
 	fi
 
 	echo "d /var/rootdirs/opt 0755 root root -" >>${tmpfiles_conf}
@@ -110,18 +109,18 @@ IMAGE_CMD_ostree () {
 	done
 
 	if [ -d root ] && [ ! -L root ]; then
-		if [ "$(ls -A root)" ]; then
-			bberror "Data in /root directory is not preserved by OSTree."
+        	if [ "$(ls -A root)" ]; then
+                	bberror "Data in /root directory is not preserved by OSTree."
 		fi
 
 		if [ -n "$SYSTEMD_USED" ]; then
-			echo "d /var/roothome 0755 root root -" >>${tmpfiles_conf}
+                       echo "d /var/rootdirs/root 0755 root root -" >>${tmpfiles_conf}
 		else
-			echo "mkdir -p /var/roothome; chown 755 /var/roothome" >>${tmpfiles_conf}
+                       echo "mkdir -p /var/rootdirs/root; chown 755 /var/rootdirs/root" >>${tmpfiles_conf}
 		fi
 
 		rm -rf root
-		ln -sf var/roothome root
+		ln -sf var/rootdirs/root root
 	fi
 
 	# deploy SOTA credentials
@@ -164,7 +163,7 @@ IMAGE_CMD_ostree () {
 
 	# add the required mount
 	echo "LABEL=otaefi     /boot/efi    auto   defaults 0 0" >>usr/etc/fstab
-	echo "LABEL=fluxdata    /var/lib/flatpak    auto   defaults 0 0" >>usr/etc/fstab
+	echo "LABEL=fluxdata    /var    auto   defaults 0 0" >>usr/etc/fstab
 
 	cd ${WORKDIR}
 
@@ -187,6 +186,7 @@ IMAGE_CMD_ostree () {
 	       --branch=${OSTREE_BRANCHNAME} \
 	       --subject="Commit-id: ${IMAGE_NAME}"
 
+	ostree summary -u --repo=${OSTREE_REPO} 
 	rm -rf ${OSTREE_ROOTFS}
 }
 

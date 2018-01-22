@@ -1,0 +1,20 @@
+diff --git a/flatpak-runtime.service.in b/flatpak-runtime.service.in
+index f59c4ed..6f18448 100644
+--- a/flatpak-runtime.service.in
++++ b/flatpak-runtime.service.in
+@@ -20,6 +20,7 @@ ExecStart=/bin/ln -sf ${_SHA1} ${_BRD}/active
+ ExecStart=/bin/mount --bind -o ro /usr/bin     ${_BRD}/${_SHA1}/files/bin
+ ExecStart=/bin/mount --bind -o ro /usr/sbin    ${_BRD}/${_SHA1}/files/sbin
+ ExecStart=/bin/mount --bind -o ro /usr/lib     ${_BRD}/${_SHA1}/files/lib
++ExecStart=/bin/sh -c "[ -d /usr/lib64 ] && /bin/mkdir -p ${_BRD}/${_SHA1}/files/lib64 && /bin/mount --bind -o ro /usr/lib64  ${_BRD}/${_SHA1}/files/lib64"
+ ExecStart=/bin/mount --bind -o ro /usr/libexec ${_BRD}/${_SHA1}/files/libexec
+ ExecStart=/bin/mount --bind -o ro /usr/share   ${_BRD}/${_SHA1}/files/share
+ ExecStart=/bin/mount --bind -o ro /etc         ${_BRD}/${_SHA1}/files/etc
+@@ -27,6 +28,7 @@ ExecStart=/bin/mount --bind -o ro /etc         ${_BRD}/${_SHA1}/files/etc
+ ExecStop=/bin/umount ${_BRD}/${_SHA1}/files/bin
+ ExecStop=/bin/umount ${_BRD}/${_SHA1}/files/sbin
+ ExecStop=/bin/umount ${_BRD}/${_SHA1}/files/lib
++ExecStop=/bin/sh -c "[ -d /usr/lib64 ] && /bin/umount  ${_BRD}/${_SHA1}/files/lib64"
+ ExecStop=/bin/umount ${_BRD}/${_SHA1}/files/libexec
+ ExecStop=/bin/umount ${_BRD}/${_SHA1}/files/share
+ ExecStop=/bin/umount ${_BRD}/${_SHA1}/files/etc

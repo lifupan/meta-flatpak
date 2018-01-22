@@ -92,16 +92,17 @@ IMAGE_CMD_otaimg () {
 		ostree admin --sysroot=${PHYS_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${OSTREE_BRANCHNAME}
 
 		# Copy deployment /home and /var/sota to sysroot
-		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
-#		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs ./var/sota ./var/local || true
+#		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
+#		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./var || true
+#		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs  ./var/local || true
 #		mv ${HOME_TMP}/var/sota ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 #		mv ${HOME_TMP}/var/local ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 		# Create /var/sota if it doesn't exist yet
-		mkdir -p ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota || true
-		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/ || true
+#		mkdir -p ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/sota || true
+#		mv ${HOME_TMP}/usr/homedirs/home ${PHYS_SYSROOT}/ || true
+#		install -d ${PHYS_SYSROOT}/usr/homedirs/home
 		# Ensure that /var/local exists (AGL symlinks /usr/local to /var/local)
-		install -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
-		rm -rf ${HOME_TMP}
+#		install -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/local
 
 		# Calculate image type
 		OTA_ROOTFS_SIZE=$(calculate_size `du -ks $PHYS_SYSROOT | cut -f 1`  "${IMAGE_OVERHEAD_FACTOR}" "${IMAGE_ROOTFS_SIZE}" "${IMAGE_ROOTFS_MAXSIZE}" `expr ${IMAGE_ROOTFS_EXTRA_SPACE}` "${IMAGE_ROOTFS_ALIGNMENT}")
@@ -112,6 +113,8 @@ IMAGE_CMD_otaimg () {
 
 		# create image
 		rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg
+		rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_efi.otaimg
+		rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_var.otaimg
 		sync
                 #create an image with the free space equal the rootfs size
 		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg seek=$OTA_ROOTFS_SIZE count=$OTA_ROOTFS_SIZE bs=1024
@@ -120,13 +123,19 @@ IMAGE_CMD_otaimg () {
 		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_efi.otaimg count=20000 bs=1024
 		mkfs.vfat ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_efi.otaimg -n otaefi 
 		mcopy -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_efi.otaimg  -s ${PHYS_SYSROOT}/boot/efi/* ::/
-
+		#create an var data partiton
+		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_var.otaimg count=20000 bs=1024
+		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_var.otaimg -L fluxdata -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/
+		
+#		rm -rf ${HOME_TMP}
 		rm -rf ${PHYS_SYSROOT}
 
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}_efi.otaimg
+		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}_var.otaimg
 		ln -s ${IMAGE_NAME}_efi.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}_efi.otaimg
 		ln -s ${IMAGE_NAME}.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
+		ln -s ${IMAGE_NAME}_var.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}_var.otaimg
 	fi
 }
 
