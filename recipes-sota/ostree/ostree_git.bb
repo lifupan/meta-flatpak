@@ -7,10 +7,10 @@ inherit autotools-brokensep pkgconfig systemd gobject-introspection
 INHERIT_remove_class-native = "systemd"
 
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master \
-	   file://0001-ostree-only-deal-with-boot-efi-EFI-BOOT-grub.cfg.patch \
 	   file://0001-ostree-fix-the-issue-of-cannot-get-the-config-entrie.patch \
 	   file://test.patch \
 	   file://tmp_fix.patch \
+           file://0001-ostree-secure-boot-support-for-no-change-to-grub.cfg.patch \
 	  "
 #           file://0001-Allow-updating-files-in-the-boot-directory.patch 
 #           file://0002-u-boot-add-bootdir-to-the-generated-uEnv.txt.patch 
@@ -92,10 +92,13 @@ FILES_${PN} += " \
     ${@'/usr/lib/dracut/modules.d/98ostree/module-setup.sh' if d.getVar('SYSTEMD_REQUIRED', True) else ''} \
     ${datadir}/gir-1.0 \
     ${datadir}/gir-1.0/OSTree-1.0.gir \
+    ${datadir}/bash-completion \
     /usr/lib/girepository-1.0 \
     /usr/lib/girepository-1.0/OSTree-1.0.typelib \
     /usr/lib/ostree/ostree-grub-generator \
     /usr/lib/ostree/ostree-remount \
+    ${systemd_unitdir} \
+    /usr/lib/tmpfiles.d \
 "
 
 PACKAGES =+ "${PN}-switchroot"

@@ -145,7 +145,7 @@ IMAGE_CMD_ostree () {
 	mkdir -p boot/loader.0
 	mkdir -p boot/loader.1
 	ln -sf boot/loader.0 boot/loader
-
+	
 	checksum=`sha256sum ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} | cut -f 1 -d " "`
 
 #	cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} boot/vmlinuz-${checksum}

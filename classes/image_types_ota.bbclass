@@ -76,6 +76,9 @@ IMAGE_CMD_otaimg () {
 			mkdir -p ${PHYS_SYSROOT}/boot/efi/EFI/BOOT
 			cp ${DEPLOY_DIR_IMAGE}/grub-efi-bootx64.efi ${PHYS_SYSROOT}/boot/efi/EFI/BOOT/bootx64.efi
 			cp ${DEPLOY_DIR_IMAGE}/grub.cfg ${PHYS_SYSROOT}/boot/efi/EFI/BOOT/
+			#create the OS vendor fallback boot dir
+			cp -a ${PHYS_SYSROOT}/boot/efi/EFI/BOOT ${PHYS_SYSROOT}/boot/efi/EFI/"${@(d.getVar('DISTRO', False) or 'pulsar')}"
+
 		elif [ "${OSTREE_BOOTLOADER}" = "u-boot" ]; then
 			touch ${PHYS_SYSROOT}/boot/loader/uEnv.txt
 		else
