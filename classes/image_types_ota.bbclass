@@ -74,10 +74,16 @@ IMAGE_CMD_otaimg () {
 
 		if [ "${OSTREE_BOOTLOADER}" = "grub" ]; then
 			mkdir -p ${PHYS_SYSROOT}/boot/efi/EFI/BOOT
-			cp ${DEPLOY_DIR_IMAGE}/grub-efi-bootx64.efi ${PHYS_SYSROOT}/boot/efi/EFI/BOOT/bootx64.efi
+			if [ -n "${@bb.utils.contains('DISTRO_FEATURES', 'efi-secure-boot', 'Y', '', d)}" ]; then
+				cp ${DEPLOY_DIR_IMAGE}/grubx64.efi ${PHYS_SYSROOT}/boot/efi/EFI/BOOT/bootx64.efi
+				cp ${DEPLOY_DIR_IMAGE}/grub.cfg.p7b ${PHYS_SYSROOT}/boot/efi/EFI/BOOT/
+			else
+				cp ${DEPLOY_DIR_IMAGE}/grub-efi-bootx64.efi ${PHYS_SYSROOT}/boot/efi/EFI/BOOT/bootx64.efi
+			fi
 			cp ${DEPLOY_DIR_IMAGE}/grub.cfg ${PHYS_SYSROOT}/boot/efi/EFI/BOOT/
 			#create the OS vendor fallback boot dir
-			cp -a ${PHYS_SYSROOT}/boot/efi/EFI/BOOT ${PHYS_SYSROOT}/boot/efi/EFI/"${@(d.getVar('DISTRO', False) or 'pulsar')}"
+			mkdir ${PHYS_SYSROOT}/boot/efi/EFI/"${@(d.getVar('DISTRO', False) or 'pulsar')}"
+			cp ${DEPLOY_DIR_IMAGE}/grub.cfg ${PHYS_SYSROOT}/boot/efi/EFI/"${@(d.getVar('DISTRO', False) or 'pulsar')}"
 
 		elif [ "${OSTREE_BOOTLOADER}" = "u-boot" ]; then
 			touch ${PHYS_SYSROOT}/boot/loader/uEnv.txt
@@ -95,8 +101,9 @@ IMAGE_CMD_otaimg () {
 		ostree admin --sysroot=${PHYS_SYSROOT} deploy ${kargs_list} --os=${OSTREE_OSNAME} ${OSTREE_BRANCHNAME}
 
 		# Copy deployment /home and /var/sota to sysroot
-#		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
-#		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./var || true
+		HOME_TMP=`mktemp -d ${WORKDIR}/home-tmp-XXXXX`
+		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./boot/efi || true
+		cp -a ${HOME_TMP}/boot/efi ${PHYS_SYSROOT}/boot
 #		tar --xattrs --xattrs-include='*' -C ${HOME_TMP} -xf ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.tar.bz2 ./usr/homedirs  ./var/local || true
 #		mv ${HOME_TMP}/var/sota ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true
 #		mv ${HOME_TMP}/var/local ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/ || true

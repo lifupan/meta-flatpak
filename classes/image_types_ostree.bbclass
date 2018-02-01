@@ -155,6 +155,13 @@ IMAGE_CMD_ostree () {
         mkdir -p usr/lib/ostree-boot
         cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL} usr/lib/ostree-boot/vmlinuz-${checksum}
         cp ${DEPLOY_DIR_IMAGE}/${OSTREE_INITRAMFS_IMAGE}-${MACHINE}${RAMDISK_EXT} usr/lib/ostree-boot/initramfs-${checksum}
+	if [ -n "${@bb.utils.contains('DISTRO_FEATURES', 'efi-secure-boot', 'Y', '', d)}" ]; then
+		cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL}.p7b usr/lib/ostree-boot/vmlinuz.p7b
+		cp ${DEPLOY_DIR_IMAGE}/${OSTREE_INITRAMFS_IMAGE}-${MACHINE}${RAMDISK_EXT}.p7b usr/lib/ostree-boot/initramfs.p7b
+	fi
+#	cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL}.p7b usr/lib/ostree-boot/vmlinuz.p7b
+#	cp ${DEPLOY_DIR_IMAGE}/${OSTREE_INITRAMFS_IMAGE}-${MACHINE}${RAMDISK_EXT}.p7b usr/lib/ostree-boot/initramfs.p7b
+	cp -a boot/efi usr/lib/ostree-boot/
 #        cp ${DEPLOY_DIR_IMAGE}/${MACHINE}.dtb usr/lib/ostree-boot
         touch usr/lib/ostree-boot/.ostree-bootcsumdir-source
 

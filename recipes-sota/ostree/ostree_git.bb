@@ -11,9 +11,10 @@ SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master \
 	   file://test.patch \
 	   file://tmp_fix.patch \
            file://0001-ostree-secure-boot-support-for-no-change-to-grub.cfg.patch \
-	  "
-#           file://0001-Allow-updating-files-in-the-boot-directory.patch 
-#           file://0002-u-boot-add-bootdir-to-the-generated-uEnv.txt.patch 
+           file://0001-Allow-updating-files-in-the-boot-directory.patch  \
+           file://0002-u-boot-add-bootdir-to-the-generated-uEnv.txt.patch \
+           file://ostree_swap_bootentry_atomically.patch \
+	"
 
 
 #SRCREV="3b09620c2738bce4ed45e099cf2e4c5df7671d39"
