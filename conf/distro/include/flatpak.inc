@@ -20,3 +20,5 @@ OSTREE_KERNEL_ARGS ?= "ramdisk_size=16384 rw rootfstype=ext4 rootwait rootdelay=
 INITRAMFS_FSTYPES = "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot', 'ext4.gz.u-boot', 'ext4.gz')}"
 
 IMAGE_BOOT_FILES ?= "grub-efi-bootx64.efi grub.cfg bzImage"
+
+MODULE_TARBALL_DEPLOY = "0"
