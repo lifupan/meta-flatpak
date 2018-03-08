@@ -135,7 +135,15 @@ IMAGE_CMD_otaimg () {
 		mcopy -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_efi.otaimg  -s ${PHYS_SYSROOT}/boot/efi/* ::/
 		#create an var data partiton
 		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_var.otaimg count=20000 bs=1024
+
+		cat<<EOF>>${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/wic.wks
+part /boot/efi --source  rootfs --rootfs-dir=/boot/efi  --ondisk sda --fstype=vfat --label otaefi --active --align 4
+part / --source rootfs --rootfs-dir=/sysroot --ondisk sda --fstype=ext4 --label otaroot --align 4
+part /var --source rootfs --rootfs-dir=/ostree/deploy/pulsar-linux/var  --ondisk sda --fstype=ext4 --label fluxdata --active --align 4
+EOF
+                
 		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_var.otaimg -L fluxdata -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/
+		rm ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/wic.wks
 		
 #		rm -rf ${HOME_TMP}
 		rm -rf ${PHYS_SYSROOT}

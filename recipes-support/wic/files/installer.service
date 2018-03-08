@@ -1,0 +1,16 @@
+[Unit]
+Description=Install the system to target device
+After=boot-efi.mount var.mount
+ConditionPathExists=/var/wic.wks
+DefaultDependencies=no
+Conflicts=umount.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/var
+ExecStart=/usr/bin/installer create /var/wic.wks 
+ExecStartPost=/usr/sbin/poweroff
+
+[Install]
+WantedBy=multi-user.target
