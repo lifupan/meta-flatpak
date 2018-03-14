@@ -138,7 +138,7 @@ IMAGE_CMD_otaimg () {
 
 		cat<<EOF>>${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/wic.wks.sample
 part /boot/efi --source  rootfs --rootfs-dir=/boot/efi  --ondisk sda --fstype=vfat --label otaefi --active --align 4
-part / --source rootfs --rootfs-dir=/sysroot --ondisk sda --fstype=ext4 --label otaroot --align 4
+part / --source rootfs --rootfs-dir=/sysroot --ondisk sda --fstype=ext4 --label otaroot --size 3G --align 4
 part /var --source rootfs --rootfs-dir=/ostree/deploy/pulsar-linux/var  --ondisk sda --fstype=ext4 --label fluxdata --active --align 4
 EOF
                 
