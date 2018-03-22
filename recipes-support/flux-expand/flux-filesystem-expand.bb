@@ -11,6 +11,7 @@ S = "${WORKDIR}"
 inherit allarch systemd
 
 SYSTEMD_SERVICE_${PN} = "flux-filesystem-expand.service"
+#SYSTEMD_AUTO_ENABLE_${PN} = "disable"
 
 RDEPENDS_${PN} = " \
     bash \

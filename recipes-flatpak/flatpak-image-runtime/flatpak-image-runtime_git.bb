@@ -42,3 +42,6 @@ do_configure_prepend () {
     cd -
 }
 
+do_install_append(){
+	sed -i 's/\(^After=.*$\)/\1 var.mount/'  ${D}/${systemd_unitdir}/system/flatpak-image-runtime.service
+}
