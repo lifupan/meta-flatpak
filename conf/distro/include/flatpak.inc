@@ -13,12 +13,15 @@ OSTREE_REPO ?= "${DEPLOY_DIR_IMAGE}/ostree_repo"
 
 OSTREE_BRANCHNAME ?= "${IMAGE_BASENAME}"
 OSTREE_OSNAME ?= "pulsar-linux"
-OSTREE_BOOTLOADER ??= 'grub'
+OSTREE_BOOTLOADER_x86 = 'grub'
+OSTREE_BOOTLOADER_x86_64 = 'grub'
+OSTREE_BOOTLOADER_arm = 'u-boot'
 OSTREE_INITRAMFS_IMAGE ?= "initramfs-ostree-image"
 OSTREE_KERNEL_ARGS ?= "ramdisk_size=16384 rw rootfstype=ext4 rootwait rootdelay=2 ostree_root=LABEL=otaroot"
 
 INITRAMFS_FSTYPES = "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER', True) == 'u-boot', 'ext4.gz.u-boot', 'ext4.gz')}"
 
-IMAGE_BOOT_FILES ?= "grub-efi-bootx64.efi grub.cfg bzImage"
+IMAGE_BOOT_FILES_x86 = "grub-efi-bootx64.efi grub.cfg bzImage"
+IMAGE_BOOT_FILES_x86_64 = "grub-efi-bootx64.efi grub.cfg bzImage"
 
 MODULE_TARBALL_DEPLOY = "0"

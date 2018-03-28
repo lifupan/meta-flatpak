@@ -13,6 +13,7 @@ OSTREE_KERNEL ??= "${KERNEL_IMAGETYPE}"
 RAMDISK_EXT ?= ".${INITRAMFS_FSTYPES}"
 
 export SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager', True) == 'systemd', 'true', '')}"
+export GRUB_USED = "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER', True) == 'grub', 'true', '')}"
 
 IMAGE_CMD_ostree () {
 	if [ -z "$OSTREE_REPO" ]; then
@@ -161,7 +162,24 @@ IMAGE_CMD_ostree () {
 	fi
 #	cp ${DEPLOY_DIR_IMAGE}/${OSTREE_KERNEL}.p7b usr/lib/ostree-boot/vmlinuz.p7b
 #	cp ${DEPLOY_DIR_IMAGE}/${OSTREE_INITRAMFS_IMAGE}-${MACHINE}${RAMDISK_EXT}.p7b usr/lib/ostree-boot/initramfs.p7b
-	cp -a boot/efi usr/lib/ostree-boot/
+        if [ -d boot/efi ]; then
+	   	cp -a boot/efi usr/lib/ostree-boot/
+	fi
+
+        if [ -f ${DEPLOY_DIR_IMAGE}/uEnv.txt ]; then
+            cp ${DEPLOY_DIR_IMAGE}/uEnv.txt usr/lib/ostree-boot/
+        fi
+
+        if [ -f ${DEPLOY_DIR_IMAGE}/boot.scr ]; then
+            cp ${DEPLOY_DIR_IMAGE}/boot.scr usr/lib/ostree-boot/boot.scr
+        fi
+
+        for i in ${KERNEL_DEVICETREE}; do
+            if [ -f ${DEPLOY_DIR_IMAGE}/$i ]; then
+                cp ${DEPLOY_DIR_IMAGE}/$i usr/lib/ostree-boot/
+            fi
+        done 
+
 #        cp ${DEPLOY_DIR_IMAGE}/${MACHINE}.dtb usr/lib/ostree-boot
         touch usr/lib/ostree-boot/.ostree-bootcsumdir-source
 
@@ -169,7 +187,9 @@ IMAGE_CMD_ostree () {
 	cat ${IMAGE_MANIFEST} | cut -d " " -f1,3 > usr/package.manifest
 
 	# add the required mount
-	echo "LABEL=otaefi     /boot/efi    auto   defaults 0 0" >>usr/etc/fstab
+        if [ -n "${GRUB_UESD}" ]; then
+	    echo "LABEL=otaefi     /boot/efi    auto   defaults 0 0" >>usr/etc/fstab
+        fi
 	echo "LABEL=fluxdata    /var    auto   defaults 0 0" >>usr/etc/fstab
 
 	cd ${WORKDIR}

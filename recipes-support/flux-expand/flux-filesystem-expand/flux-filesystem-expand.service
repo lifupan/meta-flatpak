@@ -10,6 +10,7 @@ Conflicts=umount.target
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=@BASE_BINDIR@/bash @BINDIR@/flux-filesystem-expand
+ExecStartPost=@BASE_BINDIR@/systemctl disable flux-filesystem-expand.service
 
 [Install]
 WantedBy=multi-user.target
