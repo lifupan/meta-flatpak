@@ -155,7 +155,7 @@ EOF
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}_efi.otaimg
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}_var.otaimg
-		if [ -f ${IMAGE_NAME}_efi.otaimg ]; then
+		if [ -f ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_efi.otaimg ]; then
 			ln -s ${IMAGE_NAME}_efi.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}_efi.otaimg
 		fi
 		ln -s ${IMAGE_NAME}.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg

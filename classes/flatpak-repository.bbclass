@@ -83,7 +83,7 @@ fakeroot do_flatpak_populate_repository () {
    # Generate/populate flatpak/OSTree repository
    ${FLATPAKBASE}/scripts/flatpak-populate-repo.sh \
        --repo-path ${FLATPAK_REPO} \
-       --repo-mode bare-user \
+       --repo-mode archive-z2 \
        $GPG_SIGN \
        --branches "$BRANCHES" \
        --image-sysroot ${IMAGE_ROOTFS} \
