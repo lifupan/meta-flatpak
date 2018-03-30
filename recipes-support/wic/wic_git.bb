@@ -5,6 +5,8 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=751419260aa954499f7abaabaa882bbe"
 SRCREV = "${AUTOREV}"
 PV = "1.0+git${SRCPV}"
 
+RDEPENDS_${PN} += "mtools"
+
 SRC_URI = " \
     git://github.com/lifupan/wic.git;branch=master \
     file://git/COPYING \
