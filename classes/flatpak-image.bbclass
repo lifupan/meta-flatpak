@@ -27,10 +27,10 @@ inherit flatpak-repo
 #     for developing flatpaks for the 'flatpak' image variant.
 #
 
-# 'flatpak-runtime' variant (runtime image for a device)
-IMAGE_VARIANT[flatpak-runtime] = "flatpak"
+# 'ostree-runtime' variant (runtime image for a device)
+IMAGE_VARIANT[ostree-runtime] = "flatpak"
 
-# 'flatpak-sdk' variant (SDK image for a development host)
-IMAGE_VARIANT[flatpak-sdk] = "flatpak tools-develop tools-debug dev-pkgs"
+# 'ostree-sdk' variant (SDK image for a development host)
+IMAGE_VARIANT[ostree-sdk] = "flatpak tools-develop tools-debug dev-pkgs"
 
-BBCLASSEXTEND = "imagevariant:flatpak-runtime imagevariant:flatpak-sdk"
+BBCLASSEXTEND = "imagevariant:ostree-runtime imagevariant:ostree-sdk"

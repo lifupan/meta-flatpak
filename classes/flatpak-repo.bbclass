@@ -12,7 +12,7 @@ inherit flatpak-variables
 # exported and accessible in builddata. These won't have any effect
 # unless test-iot.bbclass in inherited by local.conf or the images.
 IOTQA_EXTRA_TESTS += " \
-    oeqa.runtime.sanity.flatpak:refkit-image-minimal-flatpak-sdk \
+    oeqa.runtime.sanity.flatpak:refkit-image-minimal-ostree-sdk \
 "
 
 IOTQA_EXTRA_BUILDDATA += " \
@@ -53,8 +53,8 @@ do_flatpakrepo () {
    fi
 
    case $IMAGE_BASENAME in
-       *flatpak-sdk*)     FLATPAK_RUNTIME=sdk;;
-       *flatpak-runtime*) FLATPAK_RUNTIME=runtime;;
+       *ostree-sdk*)     FLATPAK_RUNTIME=sdk;;
+       *ostree-runtime*) FLATPAK_RUNTIME=runtime;;
        *)                 FLATPAK_RUNTIME=runtime;;
    esac
 
@@ -165,8 +165,8 @@ do_flatpakexport () {
    fi
 
    case $IMAGE_BASENAME in
-       *flatpak-sdk*)     FLATPAK_RUNTIME=sdk;;
-       *flatpak-runtime*) FLATPAK_RUNTIME=runtime;;
+       *ostree-sdk*)     FLATPAK_RUNTIME=sdk;;
+       *ostree-runtime*) FLATPAK_RUNTIME=runtime;;
        *)                 FLATPAK_RUNTIME=runtime;;
    esac
 
