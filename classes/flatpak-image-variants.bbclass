@@ -18,14 +18,14 @@ FEATURE_PACKAGES_tools-develop = "packagegroup-core-buildessential git"
 #
 # Define two flatpak-related image variants.
 #
-# - flatpak runtime image variant 'flatpak-runtime':
+# - flatpak runtime image variant 'ostree-runtime':
 #     This variant corresponds to a flatpak BasePlatform runtime. In
 #     addition to the content of its base image, this variant has the
 #     necessary runtime bits for flatpak. Using this image on a device
 #     enables one to pull in, update and run applications as flatpaks
 #     from flatpak remotes/repositories.
 #
-# - flatpak SDK image variant 'flatpak-sdk':
+# - flatpak SDK image variant 'ostree-sdk':
 #     This variant corresponds to a flatpak BaseSdk runtime. It has the
 #     necessary bits for compiling applications and publishing them as
 #     flatpaks in flatpak repositories.
@@ -33,12 +33,12 @@ FEATURE_PACKAGES_tools-develop = "packagegroup-core-buildessential git"
 # When building these images variants, a flatpak repository will also be
 # populated with the contents of these images. This repository can be used
 # to flatpak-install the runtime and SDK runtimes on a development machine
-# for generating flatpaks for the flatpak-runtime image variant.
+# for generating flatpaks for the ostree-runtime image variant.
 
-# 'flatpak-runtime' variant (runtime image for a device)
-IMAGE_VARIANT[flatpak-runtime] = "flatpak"
+# 'ostree-runtime' variant (runtime image for a device)
+IMAGE_VARIANT[ostree-runtime] = "flatpak"
 
-# 'flatpak-sdk' variant (SDK image for a development host)
-IMAGE_VARIANT[flatpak-sdk] = "flatpak tools-develop tools-debug dev-pkgs"
+# 'ostree-sdk' variant (SDK image for a development host)
+IMAGE_VARIANT[ostree-sdk] = "flatpak tools-develop tools-debug dev-pkgs"
 
-BBCLASSEXTEND += "imagevariant:flatpak-runtime imagevariant:flatpak-sdk"
+BBCLASSEXTEND += "imagevariant:ostree-runtime imagevariant:ostree-sdk"

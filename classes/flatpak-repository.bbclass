@@ -7,7 +7,7 @@ inherit flatpak-config
 # These are lists of files we check to determine the flatpak
 # runtime type of an image if it is not directly visible from
 # the image name. This did not used to be necessary before we
-# made the gateway image a flatpak-enabled (flatpak-runtime)
+# made the gateway image a flatpak-enabled (ostree-runtime)
 # by itself, but now it is. Actually we could now drop the
 # other, image name based, tests altogether...
 FLATPAK_RUNTIME_FILES = " \
@@ -30,8 +30,8 @@ fakeroot do_flatpak_populate_repository () {
 
    # Bail out early if flatpak is not enabled for this image.
    case ${IMAGE_BASENAME} in
-       *-flatpak-runtime) RUNTIME_TYPE=BasePlatform;;
-       *-flatpak-sdk)     RUNTIME_TYPE=BaseSdk;;
+       *-ostree-runtime) RUNTIME_TYPE=BasePlatform;;
+       *-ostree-sdk)     RUNTIME_TYPE=BaseSdk;;
        *)
            RUNTIME_TYPE=BaseSdk
            for f in ${FLATPAK_SDK_FILES}; do
@@ -118,8 +118,8 @@ fakeroot do_flatpak_export_repository () {
 
    # Bail out early if flatpak is not enabled for this image.
    case ${IMAGE_BASENAME} in
-       *-flatpak-runtime) RUNTIME_TYPE=BasePlatform;;
-       *-flatpak-sdk)     RUNTIME_TYPE=BaseSdk;;
+       *-ostree-runtime) RUNTIME_TYPE=BasePlatform;;
+       *-ostree-sdk)     RUNTIME_TYPE=BaseSdk;;
        *)
            RUNTIME_TYPE=BaseSdk
            for f in ${FLATPAK_SDK_FILES}; do
