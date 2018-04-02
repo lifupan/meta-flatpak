@@ -57,6 +57,8 @@ IMAGE_CMD_ostree () {
 		mkdir -p usr/etc/tmpfiles.d
 		tmpfiles_conf=usr/etc/tmpfiles.d/00ostree-tmpfiles.conf
 		echo "d /var/rootdirs 0755 root root -" >>${tmpfiles_conf}
+		# disable the annoying logs on the console
+		echo "w /proc/sys/kernel/printk - - - - 3" >> ${tmpfiles_conf}
 	else
 		mkdir -p usr/etc/init.d
 		tmpfiles_conf=usr/etc/init.d/tmpfiles.sh
@@ -84,11 +86,22 @@ IMAGE_CMD_ostree () {
 		mkdir -p usr/rootdirs/opt
 		for dir in `ls opt`; do
 			mv opt/$dir usr/rootdirs/opt/
-			echo "L /usr/rootdirs/opt/$dir - - - - /opt/$dir" >>${tmpfiles_conf}
+			echo "L /opt/$dir - - - - /usr/rootdirs/opt/$dir" >>${tmpfiles_conf}
 		done
 	fi
 	rm -rf opt
 	ln -sf var/rootdirs/opt opt
+
+	if [ -d var/lib/rpm ]; then
+	    mkdir -p usr/rootdirs/var/lib/
+	    mv var/lib/rpm usr/rootdirs/var/lib/
+	    echo "L /var/lib/rpm - - - - /usr/rootdirs/var/lib/rpm" >>${tmpfiles_conf}
+	fi
+	if [ -d var/lib/dnf ]; then
+	    mkdir -p usr/rootdirs/var/lib/
+	    mv var/lib/dnf usr/rootdirs/var/lib/
+	    echo "L /var/lib/dnf - - - - /usr/rootdirs/var/lib/dnf " >>${tmpfiles_conf}
+	fi
 
 	# Move persistent directories to /var
 	dirs="mnt media srv"
