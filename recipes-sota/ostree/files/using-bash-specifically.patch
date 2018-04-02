@@ -1,0 +1,10 @@
+diff --git a/src/boot/grub2/ostree-grub-generator b/src/boot/grub2/ostree-grub-generator
+index 3f7026e8..4539ee75 100644
+--- a/src/boot/grub2/ostree-grub-generator
++++ b/src/boot/grub2/ostree-grub-generator
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ 
+ # To use a custrom script for generating grub.cfg, set the --with-grub2-mkconfig=no
+ # configure switch when configuring and building OSTree.

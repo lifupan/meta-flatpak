@@ -14,6 +14,7 @@ SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master \
            file://0001-Allow-updating-files-in-the-boot-directory.patch  \
            file://0002-u-boot-add-bootdir-to-the-generated-uEnv.txt.patch \
            file://ostree_swap_bootentry_atomically.patch \
+	   file://using-bash-specifically.patch \
 	"
 
 
