@@ -15,6 +15,23 @@ RAMDISK_EXT ?= ".${INITRAMFS_FSTYPES}"
 export SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager', True) == 'systemd', 'true', '')}"
 export GRUB_USED = "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER', True) == 'grub', 'true', '')}"
 
+repo_apache_config () {
+    local _repo_path
+    local _repo_alias
+
+    cd $OSTREE_REPO && _repo_path=$(pwd) && cd -
+    _repo_alias="/${OSTREE_OSNAME}/${MACHINE}/"
+
+    echo "* Generating apache2 config fragment for $OSTREE_REPO..."
+    (echo "Alias \"$_repo_alias\" \"$_repo_path/\""
+     echo ""
+     echo "<Directory $_repo_path>"
+     echo "    Options Indexes FollowSymLinks"
+     echo "    Require all granted"
+     echo "</Directory>") > ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.rootfs.ostree.http.conf
+}
+
+
 IMAGE_CMD_ostree () {
 	if [ -z "$OSTREE_REPO" ]; then
 		bbfatal "OSTREE_REPO should be set in your local.conf"
@@ -227,6 +244,8 @@ IMAGE_CMD_ostree () {
 	       --subject="Commit-id: ${IMAGE_NAME}"
 
 	ostree summary -u --repo=${OSTREE_REPO} 
+	repo_apache_config
+
 	rm -rf ${OSTREE_ROOTFS}
 }
 
