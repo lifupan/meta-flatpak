@@ -1,4 +1,9 @@
 #!/bin/sh
+
+#
+# Copyright (C) 2018 Wind River Systems Inc.
+#
+
 set -eu
 # -------------------------------------------
 
