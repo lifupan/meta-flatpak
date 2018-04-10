@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#
+# Copyright (C) 2018 Wind River Systems Inc.
+#
+
 DATA_PARTITION=/dev/disk/by-label/fluxdata
 
 echo -n "Expand ext4 filesystem on $DATA_PARTITION... "
