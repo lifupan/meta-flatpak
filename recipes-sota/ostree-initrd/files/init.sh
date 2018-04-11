@@ -24,7 +24,7 @@ fluxdataexpander_run() {
     parted -s /dev/$datadev -- resizepart $datadevnum -1s
     log_info "fluxdataexpander: Finished expanding data partition."
 
-    partprobe
+    partprobe /dev/$datadev
     sync
 }
 
