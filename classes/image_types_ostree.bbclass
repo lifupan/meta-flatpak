@@ -210,6 +210,11 @@ IMAGE_CMD_ostree () {
             fi
         done 
 
+	#deploy the GPG pub key
+	if [ -f ${FLATPAK_GPGDIR}/pubring.gpg ]; then
+	    cp ${FLATPAK_GPGDIR}/pubring.gpg usr/share/ostree/trusted.gpg.d/
+	fi
+
 #        cp ${DEPLOY_DIR_IMAGE}/${MACHINE}.dtb usr/lib/ostree-boot
         touch usr/lib/ostree-boot/.ostree-bootcsumdir-source
 
@@ -240,6 +245,8 @@ IMAGE_CMD_ostree () {
 	ostree --repo=${OSTREE_REPO} commit \
 	       --tree=dir=${OSTREE_ROOTFS} \
 	       --skip-if-unchanged \
+	       --gpg-sign=${FLATPAK_GPGID} \
+	       --gpg-homedir=${FLATPAK_GPGDIR} \
 	       --branch=${OSTREE_BRANCHNAME} \
 	       --subject="Commit-id: ${IMAGE_NAME}"
 
