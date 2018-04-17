@@ -6,6 +6,7 @@ SRC_URI = "file://init.sh"
 S = "${WORKDIR}"
 
 RDEPENDS_${PN} = "initramfs-module-udev udev parted bc util-linux-lsblk"
+RDEPENDS_${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'ima', 'packagegroup-ima-initramfs', '', d)}"
 
 PV = "3"
 
