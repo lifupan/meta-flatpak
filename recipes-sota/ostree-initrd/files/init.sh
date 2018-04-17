@@ -126,16 +126,30 @@ ostree-prepare-root /sysroot
 
 # move mounted devices to new root
 cd /sysroot
-for x in dev proc; do
+for x in dev proc sys; do
 	log_info "Moving /$x to new rootfs"
-	mount -o move "/$x" "$x"
+	mount --move "/$x" "$x"
 done
 
 # switch to new rootfs
 log_info "Switching to new rootfs"
 mkdir -p run/initramfs
 
-pivot_root . run/initramfs || bail_out "pivot_root failed."
+# !!! The Big Fat Warnings !!!
+#
+# The IMA policy may enforce appraising the executable and verifying the
+# signature stored in xattr. However, ramfs doesn't support xattr, and all
+# other initializations must *NOT* be placed after IMA initialization!
+ROOT_MOUNT="/sysroot"
+[ -x /init.ima ] && /init.ima $ROOT_MOUNT && {
+    # switch_root is an exception. We call it in the real rootfs and it
+    # should be already signed properly.
+    pivot_root="usr/sbin/pivot_root.static"
+} || {
+    pivot_root="pivot_root"
+}
+
+${pivot_root} . run/initramfs || bail_out "pivot_root failed."
 
 log_info "Launching target init"
 
