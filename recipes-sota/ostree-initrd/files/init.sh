@@ -26,24 +26,6 @@ set -eu
 log_info() { echo "$0[$$]: $*" >&2; }
 log_error() { echo "$0[$$]: ERROR $*" >&2; }
 
-fluxdataexpander_enabled() {
-    for freespace in $(parted -m /dev/$datadev unit MiB print free | grep free | cut -d: -f4 | sed 's/MiB//g'); do
-        if [ $(echo $freespace \> $FREESPACE_LIMIT | bc -l) == "1" ]; then
-            return 0
-        fi
-    done
-    return 1
-}
-
-fluxdataexpander_run() {
-    log_info "fluxdataexpander: Expand data partition... "
-    parted -s /dev/$datadev -- resizepart $datadevnum -1s
-    log_info "fluxdataexpander: Finished expanding data partition."
-
-    partprobe
-    sync
-}
-
 do_mount_fs() {
 	log_info "mounting FS: $*"
 	[[ -e /proc/filesystems ]] && { grep -q "$1" /proc/filesystems || { log_error "Unknown filesystem"; return 1; } }
@@ -85,24 +67,6 @@ do_mount_fs tmpfs /run
 udevd --daemon 
 udevadm trigger --action=add
 
-while [ 1 ] ; do
-    if [ -L /dev/disk/by-label/fluxdata ]; then
-        break
-    else
-        sleep 0.1
-    fi
-done
-
-FREESPACE_LIMIT=10
-datapart=$(readlink -f /dev/disk/by-label/fluxdata)
-datadev=$(lsblk $datapart -n -o PKNAME)
-datadevnum=$(echo ${datapart} | sed 's/\(.*\)\(.\)$/\2/')
-
-if [ fluxdataexpander_enabled ]; then
-	fluxdataexpander_run
-fi
-killall -q udevd || true
-
 # check if smack is active (and if so, mount smackfs)
 grep -q smackfs /proc/filesystems && {
 	do_mount_fs smackfs /sys/fs/smackfs
@@ -115,13 +79,17 @@ grep -q smackfs /proc/filesystems && {
 mkdir -p /sysroot
 ostree_sysroot=$(get_ostree_sysroot)
 
-mount "$ostree_sysroot" /sysroot || {
-	# The SD card in the R-Car M3 takes a bit of time to come up
-	# Retry the mount if it fails the first time
-	log_info "Mounting $ostree_sysroot failed, waiting 5s for the device to be available..."
-	sleep 5
-	mount "$ostree_sysroot" /sysroot || bail_out "Unable to mount $ostree_sysroot as physical sysroot"
-}
+while [ 1 ] ; do
+    mount "$ostree_sysroot" /sysroot || {
+        log_info "Mounting $ostree_sysroot failed, waiting 0.1s for the device to be available..."
+        sleep 0.1
+        continue
+    }
+    break
+done
+
+killall -q udevd || true
+
 ostree-prepare-root /sysroot
 
 # move mounted devices to new root
