@@ -21,6 +21,35 @@
 #*/ 
 
 DATA_PARTITION=/dev/disk/by-label/fluxdata
+FREESPACE_LIMIT=10
+datapart=$(readlink -f ${DATA_PARTITION})
+datadev=$(lsblk $datapart -n -o PKNAME)
+datadevnum=$(echo ${datapart} | sed 's/\(.*\)\(.\)$/\2/')
+
+log_info() { echo "$0[$$]: $*" >&2; }
+log_error() { echo "$0[$$]: ERROR $*" >&2; }
+
+fluxdataexpander_enabled() {
+    for freespace in $(parted -m /dev/$datadev unit MiB print free | grep free | cut -d: -f4 | sed 's/MiB//g'); do
+        if [ $(echo $freespace \> $FREESPACE_LIMIT | bc -l) == "1" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+fluxdataexpander_run() {
+    log_info "fluxdataexpander: Expand data partition... "
+    parted -s /dev/$datadev -- resizepart $datadevnum -1s
+    log_info "fluxdataexpander: Finished expanding data partition."
+
+    partprobe
+    sync
+}
+
+if [ fluxdataexpander_enabled ]; then
+        fluxdataexpander_run
+fi
 
 echo -n "Expand ext4 filesystem on $DATA_PARTITION... "
 #e2fsck -y $DATA_PARTITION

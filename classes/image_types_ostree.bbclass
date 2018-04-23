@@ -44,7 +44,6 @@ IMAGE_CMD_ostree () {
 	OSTREE_ROOTFS=`mktemp -du ${WORKDIR}/ostree-root-XXXXX`
 	cp -a ${IMAGE_ROOTFS} ${OSTREE_ROOTFS}
 	chmod a+rx ${OSTREE_ROOTFS}
-	bash
 	sync
 
 	cd ${OSTREE_ROOTFS}
