@@ -225,7 +225,9 @@ IMAGE_CMD_ostree () {
         if [ -n "${GRUB_UESD}" ]; then
 	    echo "LABEL=otaefi     /boot/efi    auto   defaults 0 0" >>usr/etc/fstab
         fi
-	echo "LABEL=${FLUXDATA}	 /var    auto   defaults 0 0" >>usr/etc/fstab
+	if [ ${FLUXDATA} == "fluxdata" ]; then
+	    echo "LABEL=${FLUXDATA}	 /var    auto   defaults 0 0" >>usr/etc/fstab
+	fi
 
 	cd ${WORKDIR}
 
