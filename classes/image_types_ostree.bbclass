@@ -14,6 +14,7 @@ RAMDISK_EXT ?= ".${INITRAMFS_FSTYPES}"
 
 export SYSTEMD_USED = "${@oe.utils.ifelse(d.getVar('VIRTUAL-RUNTIME_init_manager', True) == 'systemd', 'true', '')}"
 export GRUB_USED = "${@oe.utils.ifelse(d.getVar('OSTREE_BOOTLOADER', True) == 'grub', 'true', '')}"
+export FLUXDATA = "${@bb.utils.contains('DISTRO_FEATURES', 'luks', 'luks_fluxdata', 'fluxdata', d)}"
 
 repo_apache_config () {
     local _repo_path
@@ -224,7 +225,7 @@ IMAGE_CMD_ostree () {
         if [ -n "${GRUB_UESD}" ]; then
 	    echo "LABEL=otaefi     /boot/efi    auto   defaults 0 0" >>usr/etc/fstab
         fi
-	echo "LABEL=fluxdata    /var    auto   defaults 0 0" >>usr/etc/fstab
+	echo "LABEL=${FLUXDATA}	 /var    auto   defaults 0 0" >>usr/etc/fstab
 
 	cd ${WORKDIR}
 
