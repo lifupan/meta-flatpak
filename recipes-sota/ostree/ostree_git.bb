@@ -39,7 +39,7 @@ DEPENDS_remove_class-native = "systemd-native"
 RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap xz bash"
 RDEPENDS_${PN}_remove_class-native = "python-native"
 
-EXTRA_OECONF = "--with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man --with-smack --with-builtin-grub2-mkconfig --with-curl \
+EXTRA_OECONF = "--with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man --with-smack --with-builtin-grub2-mkconfig  \
  --libdir=${libdir} "
 EXTRA_OECONF_append_class-native = " --enable-wrpseudo-compat"
 
