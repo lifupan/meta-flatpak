@@ -147,7 +147,7 @@ EOF
 		fi
 		#create an var data partiton
 		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_var.otaimg count=20000 bs=1024
-		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_var.otaimg -L fluxdata -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/
+		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_var.otaimg -L ${FLUXDATA} -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/
 		
 		rm -rf ${PHYS_SYSROOT}
 
