@@ -9,6 +9,7 @@ INHERIT_remove_class-native = "systemd"
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master \
 	   file://0001-ostree-fix-the-issue-of-cannot-get-the-config-entrie.patch \
 	   file://test.patch \
+           file://sample.conf \
 	   file://tmp_fix.patch \
            file://0001-ostree-secure-boot-support-for-no-change-to-grub.cfg.patch \
            file://0001-Allow-updating-files-in-the-boot-directory.patch  \
@@ -82,6 +83,8 @@ do_install_append() {
   install -p -D ${S}/src/boot/ostree-prepare-root.service ${D}${systemd_unitdir}/system/ostree-prepare-root.service
   install -p -D ${S}/src/boot/ostree-remount.service ${D}${systemd_unitdir}/system/ostree-remount.service
  fi
+ install -d ${D}/${sysconfdir}/ostree/remotes.d/
+ install  ${WORKDIR}/sample.conf ${D}/${sysconfdir}/ostree/remotes.d/
 }
 
 do_install_append_class-native() {
