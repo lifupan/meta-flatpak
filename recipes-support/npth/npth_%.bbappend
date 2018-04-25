@@ -1,3 +1,3 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-BBCLASSEXTEND = "native"
+BBCLASSEXTEND += "native nativesdk"
