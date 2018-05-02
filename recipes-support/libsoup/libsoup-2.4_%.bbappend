@@ -2,4 +2,4 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 DEPENDS += "glib-networking"
 
-BBCLASSEXTEND = "native"
+BBCLASSEXTEND = "native nativesdk"
