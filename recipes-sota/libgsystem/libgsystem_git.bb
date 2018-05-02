@@ -15,7 +15,7 @@ RDEPENDS_${PN}_append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' sy
 
 RDEPENDS_${PN}_remove_class-native = "systemd-native"
 
-BBCLASSEXTEND = "native"
+BBCLASSEXTEND = "native nativesdk"
 
 export STAGING_INCDIR
 export STAGING_LIBDIR

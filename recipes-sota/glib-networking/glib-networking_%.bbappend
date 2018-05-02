@@ -1,4 +1,4 @@
-BBCLASSEXTEND_append = " native"
+BBCLASSEXTEND_append = " native nativesdk"
 
 FILES_${PN} += "/usr/lib/pkgconfig"
 
