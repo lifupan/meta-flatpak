@@ -134,17 +134,30 @@ IMAGE_CMD_otaimg () {
 
                 cat<<EOF>>${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/wic.wks.sample
 part /boot/efi --source  rootfs --rootfs-dir=/boot/efi  --ondisk sda --fstype=vfat --label otaefi --active --align 4
+part /boot --source  rootfs --rootfs-dir=/boot  --ondisk sda --fstype=ext4 --label otaboot --size 200M --active --align 4
 part / --source rootfs --rootfs-dir=/sysroot --ondisk sda --fstype=ext4 --label otaroot --size 3G --align 4
 part /var --source rootfs --rootfs-dir=/ostree/deploy/pulsar-linux/var  --ondisk sda --fstype=ext4 --label ${FLUXDATA} --active --align 4
 EOF
-		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg seek=$OTA_ROOTFS_SIZE count=$OTA_ROOTFS_SIZE bs=1024
-		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg -L otaroot -d ${PHYS_SYSROOT}
-		#create an efi boot partition with 20M
+		# ESP
+		# create an EFI partition with 20M
 		if [ -d ${PHYS_SYSROOT}/boot/efi ]; then
 			dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_efi.otaimg count=20000 bs=1024
 			mkfs.vfat ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_efi.otaimg -n otaefi 
 			mcopy -i ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_efi.otaimg  -s ${PHYS_SYSROOT}/boot/efi/* ::/
+			rm -rf ${PHYS_SYSROOT}/boot/efi/*
 		fi
+
+		# boot partition
+		# Since OSTREE needs to create symlink to locate real kernel image, and vfat does not support symlink, so we need to a boot partition
+		# for kernel and initramfs images, 100MB in size
+		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_boot.otaimg count=100000 bs=1024
+		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_boot.otaimg -L otaboot -d ${PHYS_SYSROOT}/boot
+		rm -rf ${PHYS_SYSROOT}/boot/*
+
+		# rootfs partition
+		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg seek=$OTA_ROOTFS_SIZE count=$OTA_ROOTFS_SIZE bs=1024
+		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.otaimg -L otaroot -d ${PHYS_SYSROOT}
+
 		#create an var data partiton
 		dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_var.otaimg count=20000 bs=1024
 		mkfs.ext4 -O ^64bit ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_var.otaimg -L ${FLUXDATA} -d ${PHYS_SYSROOT}/ostree/deploy/${OSTREE_OSNAME}/var/
@@ -153,10 +166,12 @@ EOF
 
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}_efi.otaimg
+		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}_boot.otaimg
 		rm -f ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}_var.otaimg
 		if [ -f ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}_efi.otaimg ]; then
 			ln -s ${IMAGE_NAME}_efi.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}_efi.otaimg
 		fi
+		ln -s ${IMAGE_NAME}_boot.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}_boot.otaimg
 		ln -s ${IMAGE_NAME}.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.otaimg
 		ln -s ${IMAGE_NAME}_var.otaimg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}_var.otaimg
 	fi
