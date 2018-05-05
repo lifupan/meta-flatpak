@@ -88,6 +88,15 @@ while [ 1 ] ; do
     break
 done
 
+while [ 1 ] ; do
+    mount "LABEL=otaboot" /sysroot/boot || {
+        log_info "Mounting boot partition failed, waiting 0.1s for the device to be available..."
+        sleep 0.1
+        continue
+    }
+    break
+done
+
 killall -q udevd || true
 
 ostree-prepare-root /sysroot
