@@ -222,6 +222,7 @@ IMAGE_CMD_ostree () {
 	cat ${IMAGE_MANIFEST} | cut -d " " -f1,3 > usr/package.manifest
 
 	# add the required mount
+	echo "LABEL=otaboot     /boot    auto   defaults 0 0" >>usr/etc/fstab
         if [ -n "${GRUB_UESD}" ]; then
 	    echo "LABEL=otaefi     /boot/efi    auto   defaults 0 0" >>usr/etc/fstab
         fi
