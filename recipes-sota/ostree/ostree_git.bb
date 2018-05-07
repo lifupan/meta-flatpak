@@ -17,6 +17,7 @@ SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master \
            file://ostree_swap_bootentry_atomically.patch \
 	   file://using-bash-specifically.patch \
 	   file://0001-create-boot-symlink-based-on-relative-path.patch \
+	   file://0001-retrieve-correct-boot-prefix-at-runtime.patch \
 	"
 
 
