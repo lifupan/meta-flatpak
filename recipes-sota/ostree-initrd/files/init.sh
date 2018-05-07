@@ -97,6 +97,17 @@ while [ 1 ] ; do
     break
 done
 
+if [ -d /sysroot/boot/efi ]; then
+    while [ 1 ] ; do
+        mount "LABEL=otaefi" /sysroot/boot/efi || {
+            log_info "Mounting EFI partition failed, waiting 0.1s for the device to be available..."
+            sleep 0.1
+            continue
+        }
+        break
+    done
+fi
+
 killall -q udevd || true
 
 ostree-prepare-root /sysroot
