@@ -7,6 +7,7 @@ inherit autotools-brokensep pkgconfig systemd gobject-introspection
 INHERIT_remove_class-native = "systemd"
 
 SRC_URI = "gitsm://github.com/ostreedev/ostree.git;branch=master \
+           file://system-export.sh \
 	   file://0001-ostree-fix-the-issue-of-cannot-get-the-config-entrie.patch \
 	   file://test.patch \
            file://sample.conf \
@@ -41,6 +42,8 @@ DEPENDS_remove_class-native = "systemd-native"
 
 RDEPENDS_${PN} = "python util-linux-libuuid util-linux-libblkid util-linux-libmount libcap xz bash"
 RDEPENDS_${PN}_remove_class-native = "python-native"
+
+RDEPENDS_${PN}_append_class-target = " pv"
 
 EXTRA_OECONF = "--with-libarchive --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf --disable-man --with-smack --with-builtin-grub2-mkconfig  \
  --libdir=${libdir} "
@@ -87,6 +90,7 @@ do_install_append() {
  fi
  install -d ${D}/${sysconfdir}/ostree/remotes.d/
  install  ${WORKDIR}/sample.conf ${D}/${sysconfdir}/ostree/remotes.d/
+ install -m 0755 ${WORKDIR}/system-export.sh ${D}/${bindir}/system-export
 }
 
 do_install_append_class-native() {
